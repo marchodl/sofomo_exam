@@ -1,0 +1,30 @@
+WITH table_A AS (
+SELECT  
+    A.dimension_1,
+    MAP.correct_dimension_2 AS dimension_2,
+    A.dimension_3,
+    COALESCE(A.measure_1,0) AS measure_1
+FROM A 
+    INNER JOIN MAP on A.dimension1 = MAP.dimension1 
+),
+    table_B AS (
+SELECT  
+    B.dimension_1,
+    MAP.correct_dimension_2 AS dimension_2,
+    COALESCE(B.measure_2,0) AS measure_2
+FROM B 
+    INNER JOIN MAP on B.dimension1 = MAP.dimension1 
+),
+    combined AS(
+    SELECT  dimension_1, dimension_2, measure_1, 0 AS measure_2   FROM table_A
+    UNION
+    SELECT  dimension_1, dimension_2, 0 AS measure_1, measure_2  FROM table_B
+    )
+
+SELECT
+    dimension_1,
+    dimension_2,
+    COALESCE(SUM(measure_1),0) AS measure_1,
+     COALESCE(SUM(measure_2),0) AS measure_2
+FROM combined
+GROUP BY 1,2
